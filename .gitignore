@@ -1,0 +1,39 @@
+# Python virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Dataset
+data/*
+!data/.gitkeep
+
+# Large data files
+*.pkl
+*.csv
+*.zip
+*.mat
+*.h5
+*.hdf5
+
+# Trained models
+models/*.pth
+models/*.pt
+models/*.ckpt
+models/*.onnx
+
+# Generated results
+results/*
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+# Original SLID-CH dataset - NEVER commit
+IMUSlip/
