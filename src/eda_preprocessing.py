@@ -49,8 +49,6 @@ import matplotlib.pyplot as plt
 #   25. Correlation heatmap
 #   26. Transformation comparison
 #
-# IMPORTANT:
-# IMUSlip/ is never modified.
 # ============================================================
 
 
