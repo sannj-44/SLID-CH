@@ -1,0 +1,2 @@
+model,accuracy,precision,recall,f1_score,roc_auc,pr_auc,training_time_seconds,train_windows,test_windows,train_trials,test_trials,number_of_features,max_depth,min_samples_leaf
+Decision Tree,0.7633685745534087,0.8724706915959696,0.7328874538745388,0.7966108068134816,0.8066398069087398,0.8431387114810324,37.33954030000314,512778,137150,156,39,72,20,20

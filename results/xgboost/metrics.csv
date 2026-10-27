@@ -1,0 +1,2 @@
+model,accuracy,precision,recall,f1_score,roc_auc,pr_auc,test_samples,test_no_slip_samples,test_slip_samples,training_time_seconds
+XGBoost,0.8582573824279985,0.9299261304092222,0.8390567343173432,0.882157535492162,0.9474694592601415,0.9664727779949771,137150,50430,86720,9.502978800010169

@@ -1,0 +1,13 @@
+{
+    "model": "XGBoost",
+    "accuracy": 0.8582573824279985,
+    "precision": 0.9299261304092222,
+    "recall": 0.8390567343173432,
+    "f1_score": 0.882157535492162,
+    "roc_auc": 0.9474694592601415,
+    "pr_auc": 0.9664727779949771,
+    "test_samples": 137150,
+    "test_no_slip_samples": 50430,
+    "test_slip_samples": 86720,
+    "training_time_seconds": 9.502978800010169
+}

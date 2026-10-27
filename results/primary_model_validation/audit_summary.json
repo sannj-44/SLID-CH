@@ -1,0 +1,28 @@
+{
+    "dataset": "slid_ch_features_temporal.csv",
+    "model": "catboost_object_identity.cbm",
+    "selected_feature_count": 150,
+    "model_feature_count": 151,
+    "training_trial_count": 156,
+    "testing_trial_count": 39,
+    "train_test_trial_overlap": 0,
+    "test_window_count": 137150,
+    "test_trial_count": 39,
+    "objects": [
+        "Plastic Cup",
+        "Pringles Can",
+        "Pudding Box",
+        "Rubix Cube",
+        "Soup Can"
+    ],
+    "thresholds_evaluated": [
+        0.41,
+        0.5
+    ],
+    "limitations": [
+        "The existing test split has already been examined during development.",
+        "The generated labels still require verification against the official methodology.",
+        "Aggregate performance does not establish generalization to unseen objects.",
+        "Pringles Can slip recall requires further investigation."
+    ]
+}

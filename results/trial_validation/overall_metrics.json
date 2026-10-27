@@ -1,0 +1,18 @@
+{
+    "windows": 137150,
+    "no_slip_windows": 50430,
+    "slip_windows": 86720,
+    "accuracy": 0.8894203426904849,
+    "precision": 0.921928438332901,
+    "recall": 0.9014529520295202,
+    "f1": 0.9115757314271721,
+    "true_negatives": 43810,
+    "false_positives": 6620,
+    "false_negatives": 8546,
+    "true_positives": 78174,
+    "roc_auc": 0.9570783716221307,
+    "pr_auc": 0.9722592751473931,
+    "decision_threshold": 0.41,
+    "test_trials": 39,
+    "selected_feature_count": 150
+}

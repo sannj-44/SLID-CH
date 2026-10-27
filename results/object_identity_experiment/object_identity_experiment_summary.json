@@ -1,0 +1,52 @@
+{
+    "experiment": "CatBoost with object identity",
+    "selected_imu_features": 150,
+    "object_feature": "object",
+    "categorical_features": [
+        "object"
+    ],
+    "training_trials": 156,
+    "testing_trials": 39,
+    "training_windows": 512778,
+    "testing_windows": 137150,
+    "cv_splits": 5,
+    "cv_duration_seconds": 589.9457204341888,
+    "final_training_seconds": 106.20479440689087,
+    "thresholds_evaluated": [
+        0.41,
+        0.5
+    ],
+    "test_metrics": [
+        {
+            "threshold": 0.41,
+            "accuracy": 0.9893474298213635,
+            "precision": 0.9938142180314385,
+            "recall": 0.9893104243542435,
+            "f1": 0.991557207001566,
+            "roc_auc": 0.9975070253751318,
+            "pr_auc": 0.9970327659914894,
+            "tn": 49896,
+            "fp": 534,
+            "fn": 927,
+            "tp": 85793,
+            "model": "CatBoost + Object Identity"
+        },
+        {
+            "threshold": 0.5,
+            "accuracy": 0.9891578563616479,
+            "precision": 0.9948674477745393,
+            "recall": 0.9879497232472325,
+            "f1": 0.9913965181066554,
+            "roc_auc": 0.9975070253751318,
+            "pr_auc": 0.9970327659914894,
+            "tn": 49988,
+            "fp": 442,
+            "fn": 1045,
+            "tp": 85675,
+            "model": "CatBoost + Object Identity"
+        }
+    ],
+    "model_path": "C:\\Users\\S.Sanjay\\Downloads\\data science\\SLID-CH\\models\\catboost_object_identity\\catboost_object_identity.cbm",
+    "results_directory": "C:\\Users\\S.Sanjay\\Downloads\\data science\\SLID-CH\\results\\object_identity_experiment",
+    "important_caveat": "Metrics measure agreement with existing derived labels. The test set has been examined during previous project experiments and is not a pristine final evaluation set."
+}

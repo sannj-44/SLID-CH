@@ -1,0 +1,2 @@
+model,accuracy,precision,recall,f1_score,roc_auc,pr_auc,training_time_seconds,train_windows,test_windows,train_trials,test_trials,number_of_features,n_estimators,max_depth,min_samples_leaf
+Random Forest,0.8177105359095881,0.9117509706859515,0.7879727859778598,0.8453549580310143,0.9242016618336915,0.9526415949132376,26.599161200007075,512778,137150,156,39,72,100,20,20

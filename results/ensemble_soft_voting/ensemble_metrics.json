@@ -1,0 +1,47 @@
+{
+    "experiment": "Equal-weight soft-voting ensemble",
+    "test_windows": 137150,
+    "training_trials": 156,
+    "testing_trials": 39,
+    "threshold": 0.5,
+    "weights": {
+        "selected_catboost": 0.5,
+        "tuned_xgboost": 0.5
+    },
+    "catboost_features": 150,
+    "xgboost_features": 72,
+    "catboost_prediction_seconds": 0.1595,
+    "xgboost_prediction_seconds": 0.6064,
+    "results": {
+        "selected_catboost": {
+            "model": "Selected CatBoost",
+            "threshold": 0.5,
+            "accuracy": 0.879372949325556,
+            "precision": 0.9322885866351271,
+            "recall": 0.8726014760147601,
+            "f1_score": 0.9014581149337654,
+            "roc_auc": 0.9570783716221307,
+            "pr_auc": 0.9722592751473931
+        },
+        "tuned_xgboost": {
+            "model": "Tuned XGBoost",
+            "threshold": 0.5,
+            "accuracy": 0.8596281443674808,
+            "precision": 0.9294917498472194,
+            "recall": 0.8418588560885609,
+            "f1_score": 0.883507599961274,
+            "roc_auc": 0.9480915712739445,
+            "pr_auc": 0.9668598542496318
+        },
+        "soft_voting_ensemble": {
+            "model": "Equal-Weight Soft Voting",
+            "threshold": 0.5,
+            "accuracy": 0.8718337586584032,
+            "precision": 0.932526774096687,
+            "recall": 0.8594903136531366,
+            "f1_score": 0.8945201862608613,
+            "roc_auc": 0.9551337553771879,
+            "pr_auc": 0.9713020954110901
+        }
+    }
+}

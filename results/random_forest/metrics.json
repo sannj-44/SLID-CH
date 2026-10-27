@@ -1,0 +1,18 @@
+{
+    "model": "Random Forest",
+    "accuracy": 0.8177105359095881,
+    "precision": 0.9117509706859515,
+    "recall": 0.7879727859778598,
+    "f1_score": 0.8453549580310143,
+    "roc_auc": 0.9242016618336915,
+    "pr_auc": 0.9526415949132376,
+    "training_time_seconds": 26.599161200007075,
+    "train_windows": 512778,
+    "test_windows": 137150,
+    "train_trials": 156,
+    "test_trials": 39,
+    "number_of_features": 72,
+    "n_estimators": 100,
+    "max_depth": 20,
+    "min_samples_leaf": 20
+}

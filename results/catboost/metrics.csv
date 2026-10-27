@@ -1,0 +1,2 @@
+model,accuracy,precision,recall,f1_score,roc_auc,pr_auc,test_samples,test_no_slip_samples,test_slip_samples,training_time_seconds
+CatBoost,0.863281079110463,0.9258015611491862,0.8520641143911439,0.887403697765608,0.9464719857564431,0.9661101805078238,137150,50430,86720,30.632892800000263

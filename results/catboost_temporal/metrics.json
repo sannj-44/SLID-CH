@@ -1,0 +1,16 @@
+{
+    "model": "CatBoost with Temporal Features",
+    "feature_count": 288,
+    "training_windows": 512778,
+    "testing_windows": 137150,
+    "training_trials": 156,
+    "testing_trials": 39,
+    "threshold": 0.5,
+    "training_time_seconds": 63.4029,
+    "accuracy": 0.8783157127232957,
+    "precision": 0.9298753913203609,
+    "recall": 0.8734202029520295,
+    "f1_score": 0.9007640850304742,
+    "roc_auc": 0.9549816602586758,
+    "pr_auc": 0.9709252076315928
+}
