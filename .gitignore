@@ -1,39 +1,143 @@
-# Python virtual environment
-.venv/
+# ============================================================
+# SLID-CH — Tactile Slip Detection Project
+# ============================================================
 
-# Python cache
+
+# ------------------------------------------------------------
+# 1. Python virtual environments
+# ------------------------------------------------------------
+.venv/
+venv/
+env/
+ENV/
+
+
+# ------------------------------------------------------------
+# 2. Python cache and temporary files
+# ------------------------------------------------------------
 __pycache__/
 *.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+htmlcov/
 
-# Jupyter
+
+# ------------------------------------------------------------
+# 3. Jupyter Notebook temporary files
+# ------------------------------------------------------------
 .ipynb_checkpoints/
+*/.ipynb_checkpoints/
+.DS_Store
 
-# Dataset
-data/*
-!data/.gitkeep
 
-# Large data files
-*.pkl
-*.csv
-*.zip
+# ------------------------------------------------------------
+# 4. IDE and editor settings
+# ------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+
+# ------------------------------------------------------------
+# 5. Original dataset and processed data
+# ------------------------------------------------------------
+/IMUSlip/
+/data_processed/
+/data/
+
+# Dataset archives
+/dataset.zip
+/data_processed.zip
+
+# Dataset CSVs containing sensor data
+/dataset/slid_ch_cleaned_features.csv
+/dataset/slid_ch_raw_all_195_trials.csv
+
+# Other large sensor data formats
 *.mat
 *.h5
 *.hdf5
 
-# Trained models
-models/*.pth
-models/*.pt
-models/*.ckpt
-models/*.onnx
 
-# Generated results
-results/*
+# ------------------------------------------------------------
+# 6. Dataset and result archives
+# ------------------------------------------------------------
+/src.zip
+/results.zip
 
-# VS Code
-.vscode/
 
-# OS files
+# ------------------------------------------------------------
+# 7. Trained model checkpoints
+#    Keep model files locally; do not upload them by default
+# ------------------------------------------------------------
+/models/
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.pkl
+*.joblib
+*.cbm
+*.model
+*.safetensors
+*.h5
+*.keras
+
+
+# ------------------------------------------------------------
+# 8. Large prediction output files
+#    Keep metrics, plots, reports, and comparison results
+# ------------------------------------------------------------
+results/**/test_predictions.csv
+results/**/ensemble_test_predictions.csv
+results/**/fresh_test_predictions.csv
+results/**/oof_predictions.csv
+results/**/winner_oof_predictions.csv
+results/**/test_window_predictions.csv
+results/**/object_aware_test_predictions.csv
+
+
+# ------------------------------------------------------------
+# 9. Logs and temporary output
+# ------------------------------------------------------------
+*.log
+logs/
+tmp/
+temp/
+
+
+# ------------------------------------------------------------
+# 10. Environment variables and secrets
+# ------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# Credentials and private keys
+*.pem
+*.key
+credentials.json
+secrets.json
+
+
+# ------------------------------------------------------------
+# 11. Operating system files
+# ------------------------------------------------------------
 .DS_Store
 Thumbs.db
-# Original SLID-CH dataset - NEVER commit
-IMUSlip/
+desktop.ini
+
+
+# ------------------------------------------------------------
+# 12. Build and distribution files
+# ------------------------------------------------------------
+build/
+dist/
+*.egg-info/

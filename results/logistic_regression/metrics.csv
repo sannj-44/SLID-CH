@@ -1,0 +1,2 @@
+model,accuracy,precision,recall,f1_score,roc_auc,pr_auc,training_time_seconds,train_windows,test_windows,train_trials,test_trials,number_of_features
+Logistic Regression,0.7217280349981772,0.8246306077421943,0.7111392988929889,0.7636915265781246,0.8148749785516147,0.8562919470669728,8.197450099993148,512778,137150,156,39,72

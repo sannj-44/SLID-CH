@@ -1,0 +1,2 @@
+model,accuracy,precision,recall,f1_score,roc_auc,pr_auc,test_samples,test_no_slip_samples,test_slip_samples,training_subset_size,prediction_time_seconds,training_time_seconds
+KNN,0.7468392271235873,0.8815096333034967,0.6927352398523985,0.7758040666627924,0.8431860556410441,0.8835144119238828,137150,50430,86720,50000,12.949693300004583,0.04906360000313725

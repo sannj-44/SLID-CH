@@ -1,0 +1,2 @@
+model,accuracy,precision,recall,f1_score,roc_auc,pr_auc,test_samples,test_no_slip_samples,test_slip_samples,training_time_seconds
+LightGBM,0.8546992344148743,0.9214644488755395,0.8419626383763837,0.8799214259029393,0.9424982020399473,0.9637775520922327,137150,50430,86720,5.701272100006463

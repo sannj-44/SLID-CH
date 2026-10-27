@@ -1,0 +1,15 @@
+rank,model,family,training_data,accuracy,precision,recall,f1,roc_auc,pr_auc
+1,Feature-Selected CatBoost (Threshold 0.41),Boosted Tree + Feature Selection,Full training set,0.88942,0.921928,0.901453,0.911576,0.957078,0.972259
+2,Feature-Selected CatBoost,Boosted Tree + Feature Selection,Full training set,0.879373,0.932289,0.872601,0.901458,0.957078,0.972259
+3,Temporal CatBoost,Boosted Tree + Temporal Features,Full training set,0.878316,0.929875,0.87342,0.900764,0.954982,0.970925
+4,Tuned CatBoost,Boosted Tree,Full training set,0.8646,0.926,0.8541,0.8886,0.9457,0.9651
+5,CatBoost Baseline,Boosted Tree,Full training set,0.8633,0.9258,0.8521,0.8874,0.9465,0.9661
+6,Tuned XGBoost,Boosted Tree,Full training set,0.859628,0.929503,0.841847,0.883506,0.948093,0.966859
+7,XGBoost Baseline,Boosted Tree,Full training set,0.8583,0.9299,0.8391,0.8822,0.9475,0.9665
+8,LightGBM,Boosted Tree,Full training set,0.8547,0.9215,0.842,0.8799,0.9425,0.9638
+9,Random Forest,Ensemble Tree,Full training set,0.8177,0.9118,0.788,0.8454,0.9242,0.9526
+10,SVM,Kernel,"50,000-window subset",0.7739,0.8471,0.784,0.8143,0.8425,0.8854
+11,Decision Tree,Decision Tree,Full training set,0.7634,0.8725,0.7329,0.7966,0.8066,0.8431
+12,Extra Trees,Ensemble Tree,Full training set,0.7626,0.8467,0.7627,0.8025,0.8625,0.9092
+13,KNN,Instance-Based,"50,000-window subset",0.7468,0.8815,0.6927,0.7758,0.8432,0.8835
+14,Logistic Regression,Linear,Full training set,0.7217,0.8246,0.7111,0.7637,0.8149,0.8563

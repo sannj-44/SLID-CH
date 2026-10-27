@@ -1,0 +1,17 @@
+{
+    "model": "CatBoost Feature Selected",
+    "feature_count": 150,
+    "training_windows": 512778,
+    "testing_windows": 137150,
+    "training_trials": 156,
+    "testing_trials": 39,
+    "threshold": 0.5,
+    "cross_validation_seconds": 1413.209,
+    "final_training_seconds": 53.55,
+    "accuracy": 0.879372949325556,
+    "precision": 0.9322885866351271,
+    "recall": 0.8726014760147601,
+    "f1_score": 0.9014581149337654,
+    "roc_auc": 0.9570783716221307,
+    "pr_auc": 0.9722592751473931
+}

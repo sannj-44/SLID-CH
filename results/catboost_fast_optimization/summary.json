@@ -1,0 +1,53 @@
+{
+    "experiment": "Fast CatBoost class-weight optimization",
+    "selected_configuration": "balanced",
+    "class_weight": "Balanced",
+    "selected_feature_count": 150,
+    "training_trials": 156,
+    "testing_trials": 39,
+    "training_windows": 512778,
+    "testing_windows": 137150,
+    "cv_method": "GroupKFold",
+    "cv_folds": 5,
+    "selection_metric": "OOF F1-score at threshold 0.50",
+    "selected_threshold": 0.41,
+    "oof_metrics_at_050": {
+        "threshold": 0.5,
+        "accuracy": 0.8638572637671663,
+        "precision": 0.8267839283282701,
+        "recall": 0.8424847609113788,
+        "f1_score": 0.8345605050560106,
+        "roc_auc": 0.9307464259447313,
+        "pr_auc": 0.8911073010935071
+    },
+    "oof_metrics_at_selected_threshold": {
+        "threshold": 0.41,
+        "accuracy": 0.8619792580804949,
+        "precision": 0.8079425052798546,
+        "recall": 0.8676137070458656,
+        "f1_score": 0.8367155777039498,
+        "roc_auc": 0.9307464259447313,
+        "pr_auc": 0.8911073010935071
+    },
+    "test_metrics_at_050": {
+        "threshold": 0.5,
+        "accuracy": 0.879372949325556,
+        "precision": 0.9322885866351271,
+        "recall": 0.8726014760147601,
+        "f1_score": 0.9014581149337654,
+        "roc_auc": 0.9570783716221307,
+        "pr_auc": 0.9722592751473931
+    },
+    "test_metrics_at_selected_threshold": {
+        "threshold": 0.41,
+        "accuracy": 0.8894203426904849,
+        "precision": 0.921928438332901,
+        "recall": 0.9014529520295202,
+        "f1_score": 0.9115757314271721,
+        "roc_auc": 0.9570783716221307,
+        "pr_auc": 0.9722592751473931
+    },
+    "final_training_seconds": 33.36,
+    "model_path": "C:\\Users\\S.Sanjay\\Downloads\\data science\\SLID-CH\\models\\catboost_fast_optimization\\catboost_fast_best.cbm",
+    "class_weight_comparison_path": "C:\\Users\\S.Sanjay\\Downloads\\data science\\SLID-CH\\results\\catboost_fast_optimization\\class_weight_comparison.csv"
+}

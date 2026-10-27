@@ -1,0 +1,17 @@
+{
+    "model": "XGBoost Tuned",
+    "best_cv_accuracy": 0.8557913231091872,
+    "test_accuracy": 0.8596281443674808,
+    "test_precision": 0.9295026864607471,
+    "test_recall": 0.8418473247232472,
+    "test_f1_score": 0.8835061901707592,
+    "test_roc_auc": 0.948092910311725,
+    "test_pr_auc": 0.9668592288572455,
+    "search_duration_seconds": 1680.8144686222076,
+    "total_duration_seconds": 1688.544001340866,
+    "train_trials": 156,
+    "test_trials": 39,
+    "n_features": 72,
+    "n_search_candidates": 20,
+    "cv_folds": 5
+}

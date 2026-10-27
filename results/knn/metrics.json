@@ -1,0 +1,15 @@
+{
+    "model": "KNN",
+    "accuracy": 0.7468392271235873,
+    "precision": 0.8815096333034967,
+    "recall": 0.6927352398523985,
+    "f1_score": 0.7758040666627924,
+    "roc_auc": 0.8431860556410441,
+    "pr_auc": 0.8835144119238828,
+    "test_samples": 137150,
+    "test_no_slip_samples": 50430,
+    "test_slip_samples": 86720,
+    "training_subset_size": 50000,
+    "prediction_time_seconds": 12.949693300004583,
+    "training_time_seconds": 0.04906360000313725
+}

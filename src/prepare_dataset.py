@@ -1,113 +1,167 @@
 from pathlib import Path
 import pickle
+import warnings
+
 import numpy as np
 import pandas as pd
 
 
 # ============================================================
-# PATHS
+# CONFIGURATION
 # ============================================================
 
-DATASET = Path(r"IMUSlip\IMUSlip\data\0-Trials")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-OUTPUT_DIR = Path("data_processed")
-OUTPUT_DIR.mkdir(exist_ok=True)
+DATASET = (
+    PROJECT_ROOT
+    / "IMUSlip"
+    / "IMUSlip"
+    / "data"
+    / "0-Trials"
+)
+
+OUTPUT_DIR = PROJECT_ROOT / "data_processed"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 OUTPUT_CSV = OUTPUT_DIR / "slid_ch_features.csv"
 OUTPUT_PKL = OUTPUT_DIR / "slid_ch_features.pkl"
 
-
-# ============================================================
-# PARAMETERS
-# ============================================================
-
 WINDOW_SIZE = 30
 
-# Slip criterion from the SLID-CH dataset paper
+# Existing slip threshold. Verify against the dataset's
+# official labeling definition before interpreting results.
 SLIP_THRESHOLD = 0.06
 
-
-# ============================================================
-# IMU CHANNELS
-# ============================================================
-
-IMU_CHANNELS = [
-    "ax",
-    "ay",
-    "az",
-    "gx",
-    "gy",
-    "gz",
-]
+IMU_CHANNELS = ["ax", "ay", "az", "gx", "gy", "gz"]
 
 IMUS = [
     "Left IMU Signal",
     "Right IMU Signal",
 ]
 
+CONTACT_COMPONENTS = ["x", "y", "z"]
+
 
 # ============================================================
-# HELPER FUNCTIONS
+# PICKLE LOADING
 # ============================================================
 
 def load_pickle(path):
-    """Load a pickle file."""
-    with open(path, "rb") as f:
-        return pickle.load(f)
+    """Load a pickle file without modifying it."""
+
+    with open(path, "rb") as file:
+        return pickle.load(file)
 
 
-def safe_array(values):
+# ============================================================
+# SAFE NUMERIC ARRAY CONVERSION
+# ============================================================
+
+def safe_array(values, n_samples=None):
     """
-    Convert a list containing numbers / None / NaN
-    into a float numpy array.
+    Convert numeric values, None, and invalid values to a
+    float array.
+
+    Missing or invalid values become NaN.
+
+    If n_samples is specified, pad short arrays with NaN
+    or truncate long arrays to the required length.
     """
+
     result = []
 
     for value in values:
-        if value is None:
-            result.append(np.nan)
-        else:
-            try:
-                result.append(float(value))
-            except (ValueError, TypeError):
+        try:
+            if value is None:
                 result.append(np.nan)
+            else:
+                number = float(value)
 
-    return np.asarray(result, dtype=float)
+                if np.isfinite(number):
+                    result.append(number)
+                else:
+                    result.append(np.nan)
 
+        except (ValueError, TypeError, OverflowError):
+            result.append(np.nan)
+
+    array = np.asarray(result, dtype=np.float64)
+
+    if n_samples is not None:
+
+        if len(array) < n_samples:
+            array = np.pad(
+                array,
+                (0, n_samples - len(array)),
+                constant_values=np.nan,
+            )
+
+        elif len(array) > n_samples:
+            array = array[:n_samples]
+
+    return array
+
+
+# ============================================================
+# CONTACT VELOCITY
+# ============================================================
 
 def vector_speed(velocity_dict, n_samples):
     """
-    Calculate magnitude of a 3-D velocity vector.
+    Calculate 3D contact speed:
 
-    speed = sqrt(vx^2 + vy^2 + vz^2)
+        speed = sqrt(vx^2 + vy^2 + vz^2)
 
-    Invalid / unavailable values become NaN.
+    Missing or invalid vector components produce NaN.
     """
 
-    x = safe_array(velocity_dict["x"])
-    y = safe_array(velocity_dict["y"])
-    z = safe_array(velocity_dict["z"])
+    components = {}
 
-    # Make sure all vectors have the expected length
-    x = x[:n_samples]
-    y = y[:n_samples]
-    z = z[:n_samples]
+    for component in CONTACT_COMPONENTS:
 
-    speed = np.sqrt(x**2 + y**2 + z**2)
+        if component not in velocity_dict:
+            return np.full(n_samples, np.nan)
+
+        components[component] = safe_array(
+            velocity_dict[component],
+            n_samples=n_samples,
+        )
+
+    x = components["x"]
+    y = components["y"]
+    z = components["z"]
+
+    valid = (
+        np.isfinite(x)
+        & np.isfinite(y)
+        & np.isfinite(z)
+    )
+
+    speed = np.full(n_samples, np.nan)
+
+    speed[valid] = np.sqrt(
+        x[valid] ** 2
+        + y[valid] ** 2
+        + z[valid] ** 2
+    )
 
     return speed
 
+
+# ============================================================
+# SLIP LABEL GENERATION
+# ============================================================
 
 def create_slip_labels(velocity_data, n_samples):
     """
     Create sample-level slip labels.
 
-    A sample is labelled as slip if ANY available contact
-    point has speed > 0.06 m/s.
+    Label:
+        1 = at least one valid contact speed exceeds threshold
+        0 = valid contact speeds exist, but none exceed threshold
+       -1 = no valid contact velocity is available
 
-    Contacts:
-        LP, LD1, LD2,
-        RP, RD1, RD2
+    This preserves the existing threshold-based labeling rule.
     """
 
     contact_speeds = []
@@ -117,73 +171,122 @@ def create_slip_labels(velocity_data, n_samples):
         if not isinstance(velocity, dict):
             continue
 
-        if not all(k in velocity for k in ["x", "y", "z"]):
+        if not all(
+            component in velocity
+            for component in CONTACT_COMPONENTS
+        ):
             continue
 
-        speed = vector_speed(velocity, n_samples)
+        speed = vector_speed(
+            velocity,
+            n_samples,
+        )
 
         contact_speeds.append(speed)
 
     if not contact_speeds:
-        raise ValueError("No valid contact velocity data found.")
+        raise ValueError(
+            "No valid contact velocity data found."
+        )
 
     contact_speeds = np.vstack(contact_speeds)
 
-    # Maximum available contact speed at every timestamp
-    max_speed = np.nanmax(contact_speeds, axis=0)
+    # Identify samples for which every contact speed is missing.
+    no_velocity = np.all(
+        ~np.isfinite(contact_speeds),
+        axis=0,
+    )
 
-    # Slip = speed above threshold
-    labels = (max_speed > SLIP_THRESHOLD).astype(int)
+    # Replace missing values with -infinity temporarily.
+    # This avoids calling nanmax on all-NaN columns.
+    valid_speeds = np.where(
+        np.isfinite(contact_speeds),
+        contact_speeds,
+        -np.inf,
+    )
 
-    # Where absolutely no contact velocity exists
-    no_velocity = np.all(np.isnan(contact_speeds), axis=0)
+    max_speed = np.max(
+        valid_speeds,
+        axis=0,
+    )
 
-    labels[no_velocity] = -1
+    # Restore missing values for samples with no valid contacts.
+    max_speed[no_velocity] = np.nan
+
+    # Default every label to unavailable.
+    labels = np.full(
+        n_samples,
+        -1,
+        dtype=np.int8,
+    )
+
+    valid_velocity = ~no_velocity
+
+    labels[valid_velocity] = (
+        max_speed[valid_velocity] > SLIP_THRESHOLD
+    ).astype(np.int8)
 
     return labels, max_speed
 
 
+# ============================================================
+# STATISTICAL FEATURE EXTRACTION
+# ============================================================
+
 def extract_window_features(window):
     """
-    Extract classical statistical features from a 30-sample window.
+    Extract six statistical features from each of the
+    12 IMU channels:
 
-    For every IMU channel:
-
-        mean
-        std
-        min
-        max
-        range
-        RMS
-
-    This converts the time-series window into fixed-length
-    features suitable for classical ML.
+        Mean
+        Standard deviation
+        Minimum
+        Maximum
+        Range
+        Root mean square
     """
 
     features = {}
 
     for imu_name, channels in window.items():
 
-        imu_short = "left" if imu_name.startswith("Left") else "right"
+        imu_short = (
+            "left"
+            if imu_name.startswith("Left")
+            else "right"
+        )
 
         for channel_name in IMU_CHANNELS:
 
             values = np.asarray(
                 channels[channel_name],
-                dtype=float
+                dtype=np.float64,
             )
 
             prefix = f"{imu_short}_{channel_name}"
 
-            features[f"{prefix}_mean"] = np.mean(values)
-            features[f"{prefix}_std"] = np.std(values)
-            features[f"{prefix}_min"] = np.min(values)
-            features[f"{prefix}_max"] = np.max(values)
-            features[f"{prefix}_range"] = np.ptp(values)
+            features[f"{prefix}_mean"] = float(
+                np.mean(values)
+            )
 
-            # Root Mean Square
-            features[f"{prefix}_rms"] = np.sqrt(
-                np.mean(values ** 2)
+            features[f"{prefix}_std"] = float(
+                np.std(values)
+            )
+
+            features[f"{prefix}_min"] = float(
+                np.min(values)
+            )
+
+            features[f"{prefix}_max"] = float(
+                np.max(values)
+            )
+
+            features[f"{prefix}_range"] = float(
+                np.ptp(values)
+            )
+
+            features[f"{prefix}_rms"] = float(
+                np.sqrt(np.mean(values ** 2))
             )
 
     return features
@@ -196,7 +299,12 @@ def extract_window_features(window):
 def process_trial(trial_dir):
 
     imu_file = trial_dir / "IMU_data.pkl"
-    velocity_file = trial_dir / "smoothed_contact_sliding_velocities.pkl"
+
+    velocity_file = (
+        trial_dir
+        / "smoothed_contact_sliding_velocities.pkl"
+    )
+
     time_file = trial_dir / "times.pkl"
 
     if not imu_file.exists():
@@ -213,48 +321,37 @@ def process_trial(trial_dir):
     time_data = load_pickle(time_file)
 
     # --------------------------------------------------------
-    # Determine number of samples
+    # Validate IMU structure
     # --------------------------------------------------------
 
-    left = imu_data["Left IMU Signal"]
-    right = imu_data["Right IMU Signal"]
-
-    n_samples = len(left["ax"])
-
-    # --------------------------------------------------------
-    # Check all IMU channels have same length
-    # --------------------------------------------------------
+    if not isinstance(imu_data, dict):
+        raise ValueError(
+            f"Invalid IMU structure in {trial_dir}"
+        )
 
     for imu_name in IMUS:
 
+        if imu_name not in imu_data:
+            raise ValueError(
+                f"Missing {imu_name} in {trial_dir}"
+            )
+
         for channel in IMU_CHANNELS:
 
-            if len(imu_data[imu_name][channel]) != n_samples:
+            if channel not in imu_data[imu_name]:
                 raise ValueError(
-                    f"Channel length mismatch in {trial_dir}"
+                    f"Missing channel {channel} in {trial_dir}"
                 )
 
-    # --------------------------------------------------------
-    # Create sample-level labels
-    # --------------------------------------------------------
+    left = imu_data["Left IMU Signal"]
 
-    labels, max_speed = create_slip_labels(
-        velocity_data,
-        n_samples
-    )
+    n_samples = len(left["ax"])
 
-    times = np.asarray(
-        time_data["time"],
-        dtype=float
-    )
-
-    if len(times) != n_samples:
-        raise ValueError(
-            f"Time/IMU length mismatch in {trial_dir}"
-        )
+    if n_samples < WINDOW_SIZE:
+        return []
 
     # --------------------------------------------------------
-    # Convert IMU data to numpy arrays
+    # Convert IMU channels to arrays
     # --------------------------------------------------------
 
     imu_arrays = {}
@@ -265,13 +362,58 @@ def process_trial(trial_dir):
 
         for channel in IMU_CHANNELS:
 
-            imu_arrays[imu_name][channel] = np.asarray(
-                imu_data[imu_name][channel],
-                dtype=float
+            values = safe_array(
+                imu_data[imu_name][channel]
             )
 
+            if len(values) != n_samples:
+                raise ValueError(
+                    f"Channel length mismatch: "
+                    f"{imu_name}/{channel} in {trial_dir}"
+                )
+
+            if not np.isfinite(values).all():
+                raise ValueError(
+                    f"Invalid IMU values in "
+                    f"{imu_name}/{channel}, {trial_dir}"
+                )
+
+            imu_arrays[imu_name][channel] = values
+
     # --------------------------------------------------------
-    # Metadata
+    # Create sample-level labels
+    # --------------------------------------------------------
+
+    labels, max_speed = create_slip_labels(
+        velocity_data,
+        n_samples,
+    )
+
+    # --------------------------------------------------------
+    # Load and validate timestamps
+    # --------------------------------------------------------
+
+    if not isinstance(time_data, dict) or "time" not in time_data:
+        raise ValueError(
+            f"Invalid timestamp structure in {trial_dir}"
+        )
+
+    times = safe_array(
+        time_data["time"]
+    )
+
+    if len(times) != n_samples:
+        raise ValueError(
+            f"Timestamp/IMU length mismatch in {trial_dir}"
+        )
+
+    if not np.isfinite(times).all():
+        raise ValueError(
+            f"Invalid timestamps in {trial_dir}"
+        )
+
+    # --------------------------------------------------------
+    # Trial metadata
     # --------------------------------------------------------
 
     object_name = trial_dir.parent.name
@@ -283,32 +425,39 @@ def process_trial(trial_dir):
     # Sliding windows
     # --------------------------------------------------------
 
-    for end_idx in range(WINDOW_SIZE, n_samples + 1):
+    for end_idx in range(
+        WINDOW_SIZE,
+        n_samples + 1,
+    ):
 
         start_idx = end_idx - WINDOW_SIZE
 
-        window_label_values = labels[start_idx:end_idx]
+        window_labels = labels[
+            start_idx:end_idx
+        ]
 
-        # Skip windows where velocity information is completely
-        # unavailable.
-        if np.all(window_label_values == -1):
-            continue
-
-        # Remove unavailable label samples
-        valid_labels = window_label_values[
-            window_label_values >= 0
+        # Skip windows where every label is unavailable.
+        valid_labels = window_labels[
+            window_labels >= 0
         ]
 
         if len(valid_labels) == 0:
             continue
 
-        # Majority label inside the 30-sample window
-        slip_fraction = np.mean(valid_labels)
+        # ----------------------------------------------------
+        # Window target
+        # ----------------------------------------------------
 
-        label = int(slip_fraction >= 0.5)
+        slip_fraction = float(
+            np.mean(valid_labels)
+        )
+
+        label = int(
+            slip_fraction >= 0.5
+        )
 
         # ----------------------------------------------------
-        # Create IMU window
+        # Construct IMU window
         # ----------------------------------------------------
 
         window = {}
@@ -325,25 +474,47 @@ def process_trial(trial_dir):
                 )
 
         # ----------------------------------------------------
-        # Extract statistical features
+        # Extract IMU features
         # ----------------------------------------------------
 
-        features = extract_window_features(window)
+        features = extract_window_features(
+            window
+        )
 
         # ----------------------------------------------------
-        # Additional window-level information
+        # Additional information
         # ----------------------------------------------------
 
-        features["time_start"] = times[start_idx]
-        features["time_end"] = times[end_idx - 1]
-        features["window_duration"] = (
+        features["time_start"] = float(
+            times[start_idx]
+        )
+
+        features["time_end"] = float(
+            times[end_idx - 1]
+        )
+
+        features["window_duration"] = float(
             times[end_idx - 1] - times[start_idx]
         )
 
-        features["max_contact_speed"] = np.nanmax(
-            max_speed[start_idx:end_idx]
+        # Contact velocity is retained for analysis only.
+        # Do not use it as an input to the ML model.
+        window_speeds = max_speed[
+            start_idx:end_idx
+        ]
+
+        valid_speeds = window_speeds[
+            np.isfinite(window_speeds)
+        ]
+
+        features["max_contact_speed"] = (
+            float(np.max(valid_speeds))
+            if len(valid_speeds) > 0
+            else np.nan
         )
 
+        # Label-derived information: analysis only.
+        # Exclude this column from model inputs.
         features["slip_fraction"] = slip_fraction
 
         # Metadata
@@ -368,29 +539,57 @@ def main():
     print("SLID-CH DATA PREPROCESSING")
     print("=" * 80)
 
-    # Find all trials using IMU_data.pkl
+    if not DATASET.exists():
+        raise FileNotFoundError(
+            f"Dataset directory not found:\n{DATASET}"
+        )
+
     imu_files = sorted(
         DATASET.rglob("IMU_data.pkl")
     )
 
-    print(f"\nRaw trials found: {len(imu_files)}")
+    print(
+        f"\nRaw trials found: {len(imu_files)}"
+    )
+
+    if not imu_files:
+        raise RuntimeError(
+            "No IMU_data.pkl files were found."
+        )
 
     all_rows = []
 
     processed_trials = 0
     failed_trials = 0
+    skipped_trials = 0
 
     # --------------------------------------------------------
-    # Process every trial
+    # Process all trials
     # --------------------------------------------------------
 
-    for i, imu_file in enumerate(imu_files, start=1):
+    for i, imu_file in enumerate(
+        imu_files,
+        start=1,
+    ):
 
         trial_dir = imu_file.parent
 
         try:
 
-            rows = process_trial(trial_dir)
+            rows = process_trial(
+                trial_dir
+            )
+
+            if not rows:
+                skipped_trials += 1
+
+                print(
+                    f"[{i:03d}/{len(imu_files)}] "
+                    f"Skipped: {trial_dir.name} "
+                    f"(no usable windows)"
+                )
+
+                continue
 
             all_rows.extend(rows)
 
@@ -402,7 +601,7 @@ def main():
                 f"-> {len(rows)} windows"
             )
 
-        except Exception as e:
+        except Exception as error:
 
             failed_trials += 1
 
@@ -411,67 +610,116 @@ def main():
                 f"FAILED: {trial_dir}"
             )
 
-            print(f"       Reason: {e}")
+            print(
+                f"       Reason: {error}"
+            )
 
     # --------------------------------------------------------
-    # Create dataframe
+    # Build dataframe
     # --------------------------------------------------------
 
-    df = pd.DataFrame(all_rows)
-
-    if df.empty:
+    if not all_rows:
         raise RuntimeError(
-            "No samples were generated."
+            "No usable windows were generated."
+        )
+
+    df = pd.DataFrame(
+        all_rows
+    )
+
+    # --------------------------------------------------------
+    # Validate generated features
+    # --------------------------------------------------------
+
+    imu_feature_columns = [
+        column
+        for column in df.columns
+        if column.endswith(
+            (
+                "_mean",
+                "_std",
+                "_min",
+                "_max",
+                "_range",
+                "_rms",
+            )
+        )
+    ]
+
+    if not imu_feature_columns:
+        raise RuntimeError(
+            "No IMU feature columns were generated."
+        )
+
+    if not np.isfinite(
+        df[imu_feature_columns].to_numpy(
+            dtype=np.float64
+        )
+    ).all():
+
+        raise ValueError(
+            "Generated IMU features contain NaN or infinity."
+        )
+
+    if not df["slip"].isin([0, 1]).all():
+        raise ValueError(
+            "Unexpected target labels were generated."
         )
 
     # --------------------------------------------------------
-    # Check numerical columns
-    # --------------------------------------------------------
-
-    feature_columns = [
-        c for c in df.columns
-        if c not in [
-            "object",
-            "trial",
-            "slip"
-        ]
-    ]
-
-    # Check missing values
-    missing_count = df[feature_columns].isna().sum().sum()
-
-    # --------------------------------------------------------
-    # Save
+    # Save outputs
     # --------------------------------------------------------
 
     df.to_csv(
         OUTPUT_CSV,
-        index=False
+        index=False,
     )
 
-    with open(OUTPUT_PKL, "wb") as f:
-        pickle.dump(df, f)
+    with open(OUTPUT_PKL, "wb") as file:
+        pickle.dump(
+            df,
+            file,
+            protocol=pickle.HIGHEST_PROTOCOL,
+        )
 
     # --------------------------------------------------------
-    # Final report
+    # Summary
     # --------------------------------------------------------
 
     print("\n" + "=" * 80)
     print("PREPROCESSING COMPLETE")
     print("=" * 80)
 
-    print(f"Trials found       : {len(imu_files)}")
-    print(f"Trials processed   : {processed_trials}")
-    print(f"Trials failed      : {failed_trials}")
-
-    print(f"\nTotal windows      : {len(df)}")
-    print(f"Total features     : {len(df.columns)}")
+    print(
+        f"Trials found       : {len(imu_files)}"
+    )
 
     print(
-        f"Numerical missing values : {missing_count}"
+        f"Trials processed   : {processed_trials}"
+    )
+
+    print(
+        f"Trials skipped     : {skipped_trials}"
+    )
+
+    print(
+        f"Trials failed      : {failed_trials}"
+    )
+
+    print(
+        f"\nTotal windows      : {len(df):,}"
+    )
+
+    print(
+        f"Total columns      : {len(df.columns)}"
+    )
+
+    print(
+        f"IMU feature columns: {len(imu_feature_columns)}"
     )
 
     print("\nClass distribution:")
+
     print(
         df["slip"]
         .value_counts()
@@ -479,6 +727,7 @@ def main():
     )
 
     print("\nClass percentage:")
+
     print(
         (
             df["slip"]
@@ -489,19 +738,29 @@ def main():
     )
 
     print("\nObjects:")
+
     print(
         df["object"]
         .value_counts()
     )
 
     print("\nOutput files:")
-    print(f"  {OUTPUT_CSV}")
-    print(f"  {OUTPUT_PKL}")
 
-    print("\nFirst 5 rows:")
     print(
-        df.head().to_string()
+        f"  {OUTPUT_CSV}"
     )
+
+    print(
+        f"  {OUTPUT_PKL}"
+    )
+
+    print("\nFirst five rows:")
+
+    print(
+        df.head().to_string(index=False)
+    )
+
+    print("\nOriginal dataset files were not modified.")
 
 
 if __name__ == "__main__":

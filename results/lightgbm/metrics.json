@@ -1,0 +1,13 @@
+{
+    "model": "LightGBM",
+    "accuracy": 0.8546992344148743,
+    "precision": 0.9214644488755395,
+    "recall": 0.8419626383763837,
+    "f1_score": 0.8799214259029393,
+    "roc_auc": 0.9424982020399473,
+    "pr_auc": 0.9637775520922327,
+    "test_samples": 137150,
+    "test_no_slip_samples": 50430,
+    "test_slip_samples": 86720,
+    "training_time_seconds": 5.701272100006463
+}

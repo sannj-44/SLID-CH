@@ -1,0 +1,2 @@
+model,accuracy,precision,recall,f1_score,roc_auc,pr_auc,test_samples,test_no_slip_samples,test_slip_samples,training_subset_size,training_time_seconds
+SVC,0.7739190667152752,0.8470912194574928,0.7839598708487084,0.8143037663869874,0.8424589304582071,0.8853888218993915,137150,50430,86720,50000,524.2761268999893

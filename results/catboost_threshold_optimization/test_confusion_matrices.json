@@ -1,0 +1,36 @@
+{
+    "default_threshold": {
+        "threshold": 0.5,
+        "true_negative": 44934,
+        "false_positive": 5496,
+        "false_negative": 11048,
+        "true_positive": 75672,
+        "matrix": [
+            [
+                44934,
+                5496
+            ],
+            [
+                11048,
+                75672
+            ]
+        ]
+    },
+    "optimized_threshold": {
+        "threshold": 0.41,
+        "true_negative": 43810,
+        "false_positive": 6620,
+        "false_negative": 8546,
+        "true_positive": 78174,
+        "matrix": [
+            [
+                43810,
+                6620
+            ],
+            [
+                8546,
+                78174
+            ]
+        ]
+    }
+}

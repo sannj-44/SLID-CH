@@ -1,0 +1,8 @@
+              precision    recall  f1-score   support
+
+     No Slip     0.7633    0.8766    0.8161     50430
+        Slip     0.9215    0.8420    0.8799     86720
+
+    accuracy                         0.8547    137150
+   macro avg     0.8424    0.8593    0.8480    137150
+weighted avg     0.8633    0.8547    0.8564    137150

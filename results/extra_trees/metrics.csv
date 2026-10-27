@@ -1,0 +1,2 @@
+model,accuracy,precision,recall,f1_score,roc_auc,pr_auc,training_time_seconds,train_windows,test_windows,train_trials,test_trials,number_of_features,n_estimators,max_depth,min_samples_leaf
+Extra Trees,0.7626175720014583,0.8466964525751155,0.7626614391143911,0.8024849393022029,0.8625352222272223,0.909209454190512,3.877363100007642,512778,137150,156,39,72,100,20,20
